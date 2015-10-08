@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="false" />
+    <!-- 指定上传文件的临时存储路径 -->
+    <constant name="struts.multipart.saveDir" value="/temp"/>
+	
+	<package name="per-package" extends="struts-default">
+		<interceptors>
+			<interceptor name="permissionInterceptor" class="com.giraffe.interceptor.PermissionInterceptor"></interceptor>
+			<interceptor-stack name="myInterceptors">
+				<interceptor-ref name="permissionInterceptor"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+	</package>
+	
+  	<!-- 处理User业务 -->
+	<package name="user" namespace="/user" extends="per-package">
+		<action name="user_*" class="com.giraffe.entity.User" method="{1}">
+			<interceptor-ref name="myInterceptors"></interceptor-ref>
+			<!-- *********************************************************************************** -->
+			<result name="success">/user/admin_listUsers.jsp</result>
+			<!-- *********************************************************************************** -->
+			<result name="findUser">/user/admin_findUser.jsp</result>
+			<result name="download" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputStream">inputStream</param>
+				<param name="contentDisposition">attachment;filename=${introFileName}</param>
+			</result>
+			<!-- *********************************************************************************** -->
+			<result name="addOK" type="redirectAction">user_listUsers</result>
+			<!-- *********************************************************************************** -->
+			<result name="updateOK">/user/admin_updateUser.jsp</result>
+			<result name="saveOK" type="redirectAction">user_listUsers</result>
+			<!-- *********************************************************************************** -->
+			<result name="deleteOK" type="redirectAction">user_listUsers</result>
+			<!-- *********************************************************************************** -->
+			<result name="login">/login.jsp</result>
+			<result name="message">/user/admin_message.jsp</result>
+			<result name="input">/user/admin_{1}.jsp</result>
+			<result name="error">/user/admin_error.jsp</result>
+		</action>
+	</package>
+	
+	
+	<!-- 处理管理员登录和注销 -->
+	<package name="login" namespace="/" extends="struts-default" >
+		<action name="login" class="com.giraffe.action.LoginAction" method="login">
+			<result name="loginOK">/frameset.jsp</result>
+			<result name="loginFailed">/login.jsp</result>
+		</action>
+		<action name="logout" class="com.giraffe.action.LoginAction" method="logout">
+			<result name="logout">/login.jsp</result>
+		</action>
+	</package>
+</struts>
